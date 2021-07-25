@@ -508,8 +508,8 @@ class ICal
     /**
      * Creates the ICal object
      *
-     * @param mixed $files
-     * @param array $options
+     * @param  mixed $files
+     * @param  array $options
      */
     public function __construct($files = false, array $options = array())
     {
@@ -619,11 +619,11 @@ class ICal
     /**
      * Initialises lines from a URL
      *
-     * @param  string  $url
-     * @param  string  $username
-     * @param  string  $password
-     * @param  string  $userAgent
-     * @param  string  $acceptLanguage
+     * @param  string $url
+     * @param  string $username
+     * @param  string $password
+     * @param  string $userAgent
+     * @param  string $acceptLanguage
      * @param  string  $httpProtocolVersion
      * @param  boolean $verifySsl
      * @return ICal
@@ -685,7 +685,7 @@ class ICal
                     $line = $this->cleanCharacters($line);
                 }
 
-                $add     = $this->keyValueFromString($line);
+                $add = $this->keyValueFromString($line);
                 $keyword = $add[0];
                 $values  = $add[1]; // May be an array containing multiple values
 
@@ -717,7 +717,7 @@ class ICal
                             break;
 
                         case 'BEGIN:VEVENT':
-                            // https://www.kanzaki.com/docs/ical/vevent.html
+                        // https://www.kanzaki.com/docs/ical/vevent.html
                             if (!is_array($value)) {
                                 $this->eventCount++;
                             }
@@ -727,7 +727,7 @@ class ICal
                             break;
 
                         case 'BEGIN:VFREEBUSY':
-                            // https://www.kanzaki.com/docs/ical/vfreebusy.html
+                        // https://www.kanzaki.com/docs/ical/vfreebusy.html
                             if (!is_array($value)) {
                                 $this->freeBusyIndex++;
                             }
@@ -1238,8 +1238,8 @@ class ICal
     /**
      * Returns a date adapted to the calendar time zone depending on the event `TZID`
      *
-     * @param  array       $event
-     * @param  string      $key
+     * @param  array  $event
+     * @param  string $key
      * @param  string|null $format
      * @return string|integer|boolean|\DateTime
      */
@@ -1267,7 +1267,7 @@ class ICal
         $calendarTimeZone = $this->calendarTimeZone();
 
         if (!is_null($calendarTimeZone)) {
-            // Set the time zone we wish to use when running `$dateTime->format`.
+        // Set the time zone we wish to use when running `$dateTime->format`.
             $dateTime->setTimezone(new \DateTimeZone($calendarTimeZone));
         }
 
@@ -1292,6 +1292,10 @@ class ICal
 
         if ($events !== array()) {
             foreach ($events as $key => $anEvent) {
+                if (!isset($anEvent['DTSTART']) && isset($anEvent['DTSTAMP'])) {
+                    $anEvent['DTSTART'] = $anEvent['DTEND'] = $anEvent['DTSTAMP'];
+                    $anEvent['DTSTART_array'] = $anEvent['DTEND_array'] = $anEvent['DTSTAMP_array'];
+                }
                 foreach (array('DTSTART', 'DTEND', 'RECURRENCE-ID') as $type) {
                     if (isset($anEvent[$type])) {
                         $date = $anEvent["{$type}_array"][1];
@@ -1365,7 +1369,7 @@ class ICal
         }
 
         $allEventRecurrences = array();
-        $eventKeysToRemove   = array();
+        $eventKeysToRemove = array();
 
         foreach ($events as $key => $anEvent) {
             if (!isset($anEvent['RRULE']) || $anEvent['RRULE'] === '') {
@@ -1711,7 +1715,7 @@ class ICal
 
                     // Count all evaluated candidates including excluded ones,
                     // and if RRULE[COUNT] (if set) is reached then break.
-                    $count++;
+                        $count++;
                     if ($count >= $countLimit) {
                         break 2;
                     }
@@ -2032,10 +2036,10 @@ class ICal
     protected function getDaysOfYearMatchingByWeekNoRRule(array $byWeekNums, $initialDateTime)
     {
         // `\DateTime::format('L')` returns 1 if leap year, 0 if not.
-        $isLeapYear        = $initialDateTime->format('L');
+        $isLeapYear = $initialDateTime->format('L');
         $initialYear       = date_create("first day of January {$initialDateTime->format('Y')}");
         $firstDayOfTheYear = ($initialYear === false) ? null : $initialYear->format('D');
-        $weeksInThisYear   = ($firstDayOfTheYear === 'Thu' || $isLeapYear && $firstDayOfTheYear === 'Wed') ? 53 : 52;
+        $weeksInThisYear = ($firstDayOfTheYear === 'Thu' || $isLeapYear && $firstDayOfTheYear === 'Wed') ? 53 : 52;
 
         $matchingWeeks = $this->resolveIndicesOfRange($byWeekNums, $weeksInThisYear);
         $matchingDays = array();
@@ -2323,7 +2327,7 @@ class ICal
         }
 
         if ($rangeEnd !== false && $rangeStart !== false) {
-            // If start and end are identical and are dates with no times...
+        // If start and end are identical and are dates with no times...
             if ($rangeEnd->format('His') == 0 && $rangeStart->getTimestamp() === $rangeEnd->getTimestamp()) {
                 $rangeEnd->modify('+1 day');
             }
@@ -2468,7 +2472,7 @@ class ICal
     /**
      * Parses a duration and applies it to a date
      *
-     * @param  string        $date
+     * @param  string $date
      * @param  \DateInterval $duration
      * @return \DateTime|false
      */
@@ -2524,7 +2528,7 @@ class ICal
             $s = chr(0xf0 | $code >> 18) . chr(0x80 | $code >> 12 & 0x3f) . chr(0x80 | $code >> 6 & 0x3f) . chr(0x80 | $code & 0x3f);
         }
 
-        return $s;
+            return $s;
     }
 
     /**
@@ -2555,17 +2559,17 @@ class ICal
         return strtr(
             $input,
             array(
-                "\xe2\x80\x98"     => "'",   // ‘
-                "\xe2\x80\x99"     => "'",   // ’
-                "\xe2\x80\x9a"     => "'",   // ‚
-                "\xe2\x80\x9b"     => "'",   // ‛
-                "\xe2\x80\x9c"     => '"',   // “
-                "\xe2\x80\x9d"     => '"',   // ”
-                "\xe2\x80\x9e"     => '"',   // „
-                "\xe2\x80\x9f"     => '"',   // ‟
-                "\xe2\x80\x93"     => '-',   // –
-                "\xe2\x80\x94"     => '--',  // —
-                "\xe2\x80\xa6"     => '...', // …
+            "\xe2\x80\x98" => "'",   // ‘
+            "\xe2\x80\x99" => "'",   // ’
+            "\xe2\x80\x9a" => "'",   // ‚
+            "\xe2\x80\x9b" => "'",   // ‛
+            "\xe2\x80\x9c" => '"',   // “
+            "\xe2\x80\x9d" => '"',   // ”
+            "\xe2\x80\x9e" => '"',   // „
+            "\xe2\x80\x9f" => '"',   // ‟
+            "\xe2\x80\x93" => '-',   // –
+            "\xe2\x80\x94" => '--',  // —
+            "\xe2\x80\xa6" => '...', // …
                 $this->mb_chr(145) => "'",   // ‘
                 $this->mb_chr(146) => "'",   // ’
                 $this->mb_chr(147) => '"',   // “
@@ -2654,6 +2658,22 @@ class ICal
         return (file_exists($filename) || filter_var($filename, FILTER_VALIDATE_URL)) ?: false;
     }
 
+    protected function getics($url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0");
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+
     /**
      * Reads an entire file or URL into an array
      *
@@ -2663,55 +2683,11 @@ class ICal
      */
     protected function fileOrUrl($filename)
     {
-        $options                   = array();
-        $options['http']           = array();
-        $options['http']['header'] = array();
-
-        if ($this->httpBasicAuth !== array() || !empty($this->httpUserAgent) || !empty($this->httpAcceptLanguage)) {
-            if ($this->httpBasicAuth !== array()) {
-                $username  = $this->httpBasicAuth['username'];
-                $password  = $this->httpBasicAuth['password'];
-                $basicAuth = base64_encode("{$username}:{$password}");
-
-                $options['http']['header'][] = "Authorization: Basic {$basicAuth}";
-            }
-
-            if (!empty($this->httpUserAgent)) {
-                $options['http']['header'][] = "User-Agent: {$this->httpUserAgent}";
-            }
-
-            if (!empty($this->httpAcceptLanguage)) {
-                $options['http']['header'][] = "Accept-language: {$this->httpAcceptLanguage}";
-            }
-        }
-
-        if (empty($this->httpUserAgent)) {
-            if (mb_stripos($filename, 'outlook.office365.com') !== false) {
-                $options['http']['header'][] = 'User-Agent: A User Agent';
-            }
-        }
-
-        if (!empty($this->httpProtocolVersion)) {
-            $options['http']['protocol_version'] = $this->httpProtocolVersion;
+        if (file_exists($filename)) {
+            $lines = preg_split("/\n/", file_get_contents($filename));
         } else {
-            $options['http']['protocol_version'] = '1.1';
+            $lines = preg_split("/\n/", $this->getics($filename));
         }
-
-        if ($this->verifySsl === false) {
-            $options['ssl']                     = array();
-            $options['ssl']['verify_peer']      = false;
-            $options['ssl']['verify_peer_name'] = false;
-        }
-
-        $options['http']['header'][] = 'Connection: close';
-
-        $context = stream_context_create($options);
-
-        // phpcs:ignore CustomPHPCS.ControlStructures.AssignmentInCondition
-        if (($lines = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, $context)) === false) {
-            throw new \Exception("The file path or URL '{$filename}' does not exist.");
-        }
-
         return $lines;
     }
 
