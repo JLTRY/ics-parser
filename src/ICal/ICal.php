@@ -1185,6 +1185,11 @@ class ICal
 
         if (!empty($events)) {
             foreach ($events as $key => $anEvent) {
+				if (!isset($anEvent['DTSTART'])&& isset($anEvent['DTSTAMP']))
+				{
+					$anEvent['DTSTART'] = $anEvent['DTEND'] = $anEvent['DTSTAMP'];
+					$anEvent['DTSTART_array'] = $anEvent['DTEND_array'] = $anEvent['DTSTAMP_array'];
+				}
                 foreach (array('DTSTART', 'DTEND', 'RECURRENCE-ID') as $type) {
                     if (isset($anEvent[$type])) {
                         $date = $anEvent["{$type}_array"][1];
@@ -2559,6 +2564,21 @@ class ICal
     {
         return (file_exists($filename) || filter_var($filename, FILTER_VALIDATE_URL)) ?: false;
     }
+	
+	static function getics($url) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);		
+		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0");
+		curl_setopt ($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt ($ch,CURLOPT_CONNECTTIMEOUT,120);
+		curl_setopt ($ch,CURLOPT_TIMEOUT,120);
+		curl_setopt ($ch,CURLOPT_MAXREDIRS,10);		
+		$result = curl_exec($ch);
+		curl_close($ch);
+		return $result;
+	}
 
     /**
      * Reads an entire file or URL into an array
@@ -2569,40 +2589,15 @@ class ICal
      */
     protected function fileOrUrl($filename)
     {
-        $options                   = array();
-        $options['http']           = array();
-        $options['http']['header'] = array();
-
-        if (!empty($this->httpBasicAuth) || !empty($this->httpUserAgent) || !empty($this->httpAcceptLanguage)) {
-            if (!empty($this->httpBasicAuth)) {
-                $username  = $this->httpBasicAuth['username'];
-                $password  = $this->httpBasicAuth['password'];
-                $basicAuth = base64_encode("{$username}:{$password}");
-
-                $options['http']['header'][] = "Authorization: Basic {$basicAuth}";
-            }
-
-            if (!empty($this->httpUserAgent)) {
-                $options['http']['header'][] = "User-Agent: {$this->httpUserAgent}";
-            }
-
-            if (!empty($this->httpAcceptLanguage)) {
-                $options['http']['header'][] = "Accept-language: {$this->httpAcceptLanguage}";
-            }
-        }
-
-        $options['http']['protocol_version'] = '1.1';
-
-        $options['http']['header'][] = 'Connection: close';
-
-        $context = stream_context_create($options);
-
-        // phpcs:ignore CustomPHPCS.ControlStructures.AssignmentInCondition
-        if (($lines = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES, $context)) === false) {
-            throw new \Exception("The file path or URL '{$filename}' does not exist.");
-        }
-
-        return $lines;
+		if (file_exists($filename))
+		{
+			$lines = preg_split("/\n/", file_get_contents($filename));
+		}
+		else
+		{
+			$lines = preg_split("/\n/", $this->getics($filename));
+		}		
+		return $lines;
     }
 
     /**
